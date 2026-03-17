@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tags</title>
-  <script src="readTag.js"></script>
   <style>
     body {
       font-family: monospace, sans-serif;
@@ -52,6 +51,13 @@
   <button onclick="startNFC()">Start Scanning</button>
 
   <script>
+    function getTime() {
+      return new Date().toLocaleTimeString();
+    }
+    function getDate() {
+      return new Date().toLocaleDateString();
+    }
+
     function updatePoint(pointID) {
       document.getElementById(pointID + '-date').textContent = getDate();
       document.getElementById(pointID + '-time').textContent = getTime();
@@ -86,4 +92,3 @@
   </script>
 </body>
 </html>
-
