@@ -48,7 +48,8 @@
     </tbody>
   </table>
 
-  <p id="nfc-status">Waiting for scan...</p>
+  <p id="nfc-status">Press the button, then scan a tag.</p>
+  <button onclick="startNFC()">Start Scanning</button>
 
   <script>
     function updatePoint(pointID) {
@@ -75,12 +76,14 @@
             else if (text === 'point-b') updatePoint('point-b');
           }
         });
+        reader.addEventListener('readingerror', () => {
+          document.getElementById('nfc-status').textContent = 'Error reading tag — try again';
+        });
       } catch (error) {
         document.getElementById('nfc-status').textContent = 'NFC error: ' + error;
       }
     }
-
-    startNFC();
   </script>
 </body>
 </html>
+
