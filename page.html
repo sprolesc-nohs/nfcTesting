@@ -59,8 +59,16 @@
     }
 
     function updatePoint(pointID) {
-      document.getElementById(pointID + '-date').textContent = getDate();
-      document.getElementById(pointID + '-time').textContent = getTime();
+      date = document.getElementById(pointID + '-date').textContent = getDate();
+      time = document.getElementById(pointID + '-time').textContent = getTime();
+
+      const fs = require('fs');
+      try{
+        fs.writeFileSync('log.txt', `${pointID} scanned at ${date} ${time}\n`, { flag: 'a' });
+      }
+      catch (err) {
+        console.error('Error writing to log file:', err);
+      }
     }
 
     async function startNFC() {
