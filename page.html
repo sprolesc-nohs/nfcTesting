@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tags</title>
+  <title>NFC Tag Tracker</title>
   <style>
     body {
-      font-family: monospace, Impact;
+      font-family: monospace, sans-serif;
       padding: 20px;
     }
     table {
@@ -14,17 +14,17 @@
       width: 400px;
     }
     th, td {
-      border: 1px solid #ccc;
+      border: 1px solid #9cb37e;
       padding: 10px 16px;
       text-align: left;
     }
     th {
-      background-color: #6fb369;
+      background-color: #c7bb6f;
     }
   </style>
 </head>
 <body>
-  <h1>Tags</h1>
+  <h1>NFC Tag Tracker</h1>
   <table>
     <thead>
       <tr>
@@ -48,7 +48,7 @@
   </table>
 
   <p id="nfc-status">Press the button, then scan a tag.</p>
-  <button onclick="startNFC()">Start Scanning</button>
+  <button onclick="startNFC()">Approach the Tag</button>
 
   <script>
     function getTime() {
