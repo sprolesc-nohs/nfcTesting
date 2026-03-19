@@ -48,9 +48,12 @@
   </table>
 
   <p id="nfc-status">Press the button, then scan a tag.</p>
+  <p id="folder-status">Logs folder not selected.</p>
   <button onclick="startNFC()">Approach the Tag</button>
 
   <script>
+    let logsDirectoryHandle = null;
+
     function getTime() {
       return new Date().toLocaleTimeString();
     }
@@ -58,21 +61,49 @@
       return new Date().toLocaleDateString();
     }
 
-    function updatePoint(pointID) {
-      date = document.getElementById(pointID + '-date').textContent = getDate();
-      time = document.getElementById(pointID + '-time').textContent = getTime();
+    async function ensureLogsDirectory() {
+      if (!window.showDirectoryPicker) {
+        throw new Error('This browser does not support folder writing. Use Chrome or Edge.');
+      }
 
-      const fs = require('fs');
-      try{
-        fs.writeFileSync('log.txt', `${pointID} scanned at ${date} ${time}\n`, { flag: 'a' });
+      if (!logsDirectoryHandle) {
+        logsDirectoryHandle = await window.showDirectoryPicker();
+        document.getElementById('folder-status').textContent = 'Logs folder selected: ' + logsDirectoryHandle.name;
       }
-      catch (err) {
-        console.error('Error writing to log file:', err);
+
+      const permission = await logsDirectoryHandle.requestPermission({ mode: 'readwrite' });
+      if (permission !== 'granted') {
+        throw new Error('Write permission to the logs folder was not granted.');
       }
+
+      return logsDirectoryHandle;
+    }
+
+    async function appendLogEntry(pointID, date, time) {
+      const directoryHandle = await ensureLogsDirectory();
+      const fileHandle = await directoryHandle.getFileHandle(pointID + '.txt', { create: true });
+      const existingFile = await fileHandle.getFile();
+      const writable = await fileHandle.createWritable({ keepExistingData: true });
+      const logLine = pointID + ' scanned at ' + date + ' ' + time + '\n';
+
+      await writable.seek(existingFile.size);
+      await writable.write(logLine);
+      await writable.close();
+    }
+
+    async function updatePoint(pointID) {
+      const date = getDate();
+      const time = getTime();
+
+      document.getElementById(pointID + '-date').textContent = date;
+      document.getElementById(pointID + '-time').textContent = time;
+
+      await appendLogEntry(pointID, date, time);
     }
 
     async function startNFC() {
       try {
+        await ensureLogsDirectory();
         const reader = new NDEFReader();
         await reader.scan();
         document.getElementById('nfc-status').textContent = 'NFC ready — scan a tag';
@@ -86,8 +117,16 @@
             }
             text = text.trim();
             document.getElementById('nfc-status').textContent = 'Last scan: "' + text + '"';
-            if (text === 'point-a') updatePoint('point-a');
-            else if (text === 'point-b') updatePoint('point-b');
+
+            if (text === 'point-a') {
+              updatePoint('point-a').catch(error => {
+                document.getElementById('nfc-status').textContent = 'Log write error: ' + error.message;
+              });
+            } else if (text === 'point-b') {
+              updatePoint('point-b').catch(error => {
+                document.getElementById('nfc-status').textContent = 'Log write error: ' + error.message;
+              });
+            }
           }
         });
         reader.addEventListener('readingerror', () => {
