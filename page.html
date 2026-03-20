@@ -5,15 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
   <title>NFC Tag Tracker</title>
   <style>
+    html {
+      font-size: clamp(12px, 3.5vw, 16px);
+    }
     body {
       font-family: monospace, sans-serif;
-      padding: 20px;
+      padding: 4vw;
       background: #f4f7ef;
       color: #223018;
     }
     .app-shell {
       max-width: 960px;
-      width: 95%;
+      width: 100%;
       margin: 0 auto;
       box-sizing: border-box;
     }
@@ -65,7 +68,6 @@
     table {
       border-collapse: collapse;
       width: 100%;
-      min-width: 520px;
     }
     .history-card {
       border: 1px solid #d7e2ca;
@@ -81,42 +83,20 @@
     }
     th, td {
       border: 1px solid #9cb37e;
-      padding: 10px 16px;
+      padding: 0.6em 1em;
       text-align: left;
+      word-break: break-word;
     }
     th {
       background-color: #c7bb6f;
       background-color: #8fa873;
     }
 
-    @media (max-width: 640px) {
-      body { padding: 12px; }
-      .tab-button { padding: 8px 10px; font-size: 0.95rem; }
-      .primary-button { padding: 8px 12px; }
-      .history-card { padding: 12px; }
-      .scan-summary { font-size: 0.95rem; }
-      table th, table td { padding: 8px 10px; }
-      .history-stack { gap: 12px; }
-    }
-
-    @media (max-width: 768px) {
-      body { font-size: 0.9rem; }
-      .tab-button { padding: 8px 12px; font-size: 0.9rem; }
-      .primary-button { padding: 8px 14px; font-size: 0.9rem; }
-      .history-card { padding: 12px; }
-      .scan-summary { font-size: 0.9rem; }
-      table { font-size: 0.85rem; }
-      table th, table td { padding: 8px 10px; }
-    }
-
     @media (max-width: 480px) {
-      body { font-size: 0.8rem; }
-      .tab-button { padding: 6px 8px; font-size: 0.8rem; }
-      .primary-button { padding: 6px 10px; font-size: 0.8rem; }
-      .history-card { padding: 10px; }
-      .scan-summary { font-size: 0.8rem; }
-      table { font-size: 0.75rem; }
-      table th, table td { padding: 6px 8px; }
+      body { padding: 3vw; }
+      .tab-panel { padding: 3vw; }
+      .history-card { padding: 2.5vw; }
+      .history-stack { gap: 3vw; }
     }
   </style>
 </head>
