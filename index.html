@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+  <title>NFC Tag Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <h1>NFC Tag Tracker</h1>
+
+    <div class="tabs">
+      <button id="scanner-button" class="tab-button active" onclick="showTab('scanner')">Scanner</button>
+      <button id="history-button" class="tab-button" onclick="showTab('history')">History</button>
+    </div>
+
+    <section id="scanner-tab" class="tab-panel">
+      <p id="nfc-status">Press the button, then scan a tag.</p>
+      <div class="actions">
+        <button class="primary-button" onclick="startNFC()">Approach the Tag</button>
+      </div>
+      <p id="last-scan" class="scan-summary single-line">Last scan: none</p>
+    </section>
+
+    <section id="history-tab" class="tab-panel" hidden>
+      <div class="history-stack">
+        <div class="history-card">
+          <h2>Last Scan</h2>
+          <p id="history-last-scan" class="single-line">No scans yet.</p>
+        </div>
+
+        <div class="history-card">
+          <h2>Latest by Location</h2>
+          <div class="table-wrap">
+            <table>
+            <thead>
+              <tr>
+                <th>Location</th>
+                <th>Date</th>
+                <th>Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Point A</td>
+                <td id="point-a-date"></td>
+                <td id="point-a-time"></td>
+              </tr>
+              <tr>
+                <td>Point B</td>
+                <td id="point-b-date"></td>
+                <td id="point-b-time"></td>
+              </tr>
+            </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="history-card">
+          <div class="card-header">
+            <h2>Full History</h2>
+            <button class="small-button" onclick="exportHistory()">Export CSV</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+            <thead>
+              <tr>
+                <th>Location</th>
+                <th>Date</th>
+                <th>Time</th>
+              </tr>
+            </thead>
+            <tbody id="history-log-body">
+              <tr>
+                <td colspan="3">No scans recorded yet.</td>
+              </tr>
+            </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>
