@@ -8,10 +8,51 @@
     body {
       font-family: monospace, sans-serif;
       padding: 20px;
+      background: #f4f7ef;
+      color: #223018;
+    }
+    .app-shell {
+      max-width: 760px;
+    }
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    .tab-button {
+      border: 1px solid #8fa873;
+      background: #d7e2ca;
+      color: #223018;
+      padding: 10px 18px;
+      cursor: pointer;
+      font: inherit;
+    }
+    .tab-button.active {
+      background: #8fa873;
+      color: #f8fbf4;
+    }
+    .tab-panel {
+      border: 1px solid #b9c9a6;
+      background: #fbfcf8;
+      padding: 18px;
+    }
+    .actions {
+      margin: 16px 0;
+    }
+    .primary-button {
+      border: 1px solid #6f8559;
+      background: #8fa873;
+      color: #f8fbf4;
+      padding: 10px 16px;
+      cursor: pointer;
+      font: inherit;
+    }
+    .scan-summary {
+      margin-top: 12px;
     }
     table {
       border-collapse: collapse;
-      width: 400px;
+      width: 100%;
     }
     th, td {
       border: 1px solid #9cb37e;
@@ -19,40 +60,62 @@
       text-align: left;
     }
     th {
+      background-color: #c7bb6f;
       background-color: #8fa873;
     }
   </style>
 </head>
 <body>
-  <h1>NFC Tag Tracker</h1>
-  <table>
-    <thead>
-      <tr>
-        <th>Location</th>
-        <th>Date</th>
-        <th>Time</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>Point A</td>
-        <td id="point-a-date"></td>
-        <td id="point-a-time"></td>
-      </tr>
-      <tr>
-        <td>Point B</td>
-        <td id="point-b-date"></td>
-        <td id="point-b-time"></td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="app-shell">
+    <h1>NFC Tag Tracker</h1>
 
-  <p id="nfc-status">Press the button, then scan a tag.</p>
-  <p id="folder-status">Logs folder not selected.</p>
-  <button onclick="startNFC()">Approach the Tag</button>
+    <div class="tabs">
+      <button id="scanner-button" class="tab-button active" onclick="showTab('scanner')">Scanner</button>
+      <button id="history-button" class="tab-button" onclick="showTab('history')">History</button>
+    </div>
+
+    <section id="scanner-tab" class="tab-panel">
+      <p id="nfc-status">Press the button, then scan a tag.</p>
+      <div class="actions">
+        <button class="primary-button" onclick="startNFC()">Approach the Tag</button>
+      </div>
+      <p id="last-scan" class="scan-summary">Last scan: none</p>
+    </section>
+
+    <section id="history-tab" class="tab-panel" hidden>
+      <table>
+        <thead>
+          <tr>
+            <th>Location</th>
+            <th>Date</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Point A</td>
+            <td id="point-a-date"></td>
+            <td id="point-a-time"></td>
+          </tr>
+          <tr>
+            <td>Point B</td>
+            <td id="point-b-date"></td>
+            <td id="point-b-time"></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
 
   <script>
-    let logsDirectoryHandle = null;
+    function showTab(tabName) {
+      const isScanner = tabName === 'scanner';
+
+      document.getElementById('scanner-tab').hidden = !isScanner;
+      document.getElementById('history-tab').hidden = isScanner;
+      document.getElementById('scanner-button').classList.toggle('active', isScanner);
+      document.getElementById('history-button').classList.toggle('active', !isScanner);
+    }
 
     function getTime() {
       return new Date().toLocaleTimeString();
@@ -61,49 +124,21 @@
       return new Date().toLocaleDateString();
     }
 
-    async function ensureLogsDirectory() {
-      if (!window.showDirectoryPicker) {
-        throw new Error('This browser does not support folder writing. Use Chrome or Edge.');
+    function updatePoint(pointID) {
+      const date = document.getElementById(pointID + '-date').textContent = getDate();
+      const time = document.getElementById(pointID + '-time').textContent = getTime();
+
+      const fs = require('fs');
+      try{
+        fs.writeFileSync('log.txt', `${pointID} scanned at ${date} ${time}\n`, { flag: 'a' });
       }
-
-      if (!logsDirectoryHandle) {
-        logsDirectoryHandle = await window.showDirectoryPicker();
-        document.getElementById('folder-status').textContent = 'Logs folder selected: ' + logsDirectoryHandle.name;
+      catch (err) {
+        console.error('Error writing to log file:', err);
       }
-
-      const permission = await logsDirectoryHandle.requestPermission({ mode: 'readwrite' });
-      if (permission !== 'granted') {
-        throw new Error('Write permission to the logs folder was not granted.');
-      }
-
-      return logsDirectoryHandle;
-    }
-
-    async function appendLogEntry(pointID, date, time) {
-      const directoryHandle = await ensureLogsDirectory();
-      const fileHandle = await directoryHandle.getFileHandle(pointID + '.txt', { create: true });
-      const existingFile = await fileHandle.getFile();
-      const writable = await fileHandle.createWritable({ keepExistingData: true });
-      const logLine = pointID + ' scanned at ' + date + ' ' + time + '\n';
-
-      await writable.seek(existingFile.size);
-      await writable.write(logLine);
-      await writable.close();
-    }
-
-    async function updatePoint(pointID) {
-      const date = getDate();
-      const time = getTime();
-
-      document.getElementById(pointID + '-date').textContent = date;
-      document.getElementById(pointID + '-time').textContent = time;
-
-      await appendLogEntry(pointID, date, time);
     }
 
     async function startNFC() {
       try {
-        await ensureLogsDirectory();
         const reader = new NDEFReader();
         await reader.scan();
         document.getElementById('nfc-status').textContent = 'NFC ready — scan a tag';
@@ -117,16 +152,9 @@
             }
             text = text.trim();
             document.getElementById('nfc-status').textContent = 'Last scan: "' + text + '"';
-
-            if (text === 'point-a') {
-              updatePoint('point-a').catch(error => {
-                document.getElementById('nfc-status').textContent = 'Log write error: ' + error.message;
-              });
-            } else if (text === 'point-b') {
-              updatePoint('point-b').catch(error => {
-                document.getElementById('nfc-status').textContent = 'Log write error: ' + error.message;
-              });
-            }
+            document.getElementById('last-scan').textContent = 'Last scan: ' + text;
+            if (text === 'point-a') updatePoint('point-a');
+            else if (text === 'point-b') updatePoint('point-b');
           }
         });
         reader.addEventListener('readingerror', () => {
