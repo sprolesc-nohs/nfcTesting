@@ -54,6 +54,22 @@
       cursor: pointer;
       font: inherit;
     }
+    .small-button {
+      border: 1px solid #6f8559;
+      background: #8fa873;
+      color: #f8fbf4;
+      padding: 6px 8px;
+      cursor: pointer;
+      font: inherit;
+      font-size: 0.85rem;
+    }
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
     .scan-summary {
       margin-top: 12px;
     }
@@ -131,9 +147,6 @@
     </section>
 
     <section id="history-tab" class="tab-panel" hidden>
-      <div class="actions">
-        <button class="primary-button" onclick="exportHistory()">Export CSV</button>
-      </div>
       <div class="history-stack">
         <div class="history-card">
           <h2>Last Scan</h2>
@@ -168,7 +181,10 @@
         </div>
 
         <div class="history-card">
-          <h2>Full History</h2>
+          <div class="card-header">
+            <h2>Full History</h2>
+            <button class="small-button" onclick="exportHistory()">Export CSV</button>
+          </div>
           <div class="table-wrap">
             <table>
             <thead>
