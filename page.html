@@ -86,6 +86,19 @@
       padding: 0.6em 1em;
       text-align: left;
       word-break: break-word;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: clamp(0.75rem, 2.2vw, 1rem);
+      max-width: 24ch;
+    }
+
+    /* utility for any element that should stay on one line and scale within limits */
+    .single-line {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: clamp(0.75rem, 2.2vw, 1rem);
     }
     th {
       background-color: #c7bb6f;
@@ -114,14 +127,14 @@
       <div class="actions">
         <button class="primary-button" onclick="startNFC()">Approach the Tag</button>
       </div>
-      <p id="last-scan" class="scan-summary">Last scan: none</p>
+      <p id="last-scan" class="scan-summary single-line">Last scan: none</p>
     </section>
 
     <section id="history-tab" class="tab-panel" hidden>
       <div class="history-stack">
         <div class="history-card">
           <h2>Last Scan</h2>
-          <p id="history-last-scan">No scans yet.</p>
+          <p id="history-last-scan" class="single-line">No scans yet.</p>
         </div>
 
         <div class="history-card">
