@@ -50,6 +50,22 @@
     .scan-summary {
       margin-top: 12px;
     }
+    .history-stack {
+      display: grid;
+      gap: 18px;
+    }
+    .history-card {
+      border: 1px solid #d7e2ca;
+      background: #f4f7ef;
+      padding: 14px;
+    }
+    .history-card h2 {
+      margin: 0 0 10px;
+      font-size: 1rem;
+    }
+    .history-card p {
+      margin: 0;
+    }
     table {
       border-collapse: collapse;
       width: 100%;
@@ -83,31 +99,62 @@
     </section>
 
     <section id="history-tab" class="tab-panel" hidden>
-      <table>
-        <thead>
-          <tr>
-            <th>Location</th>
-            <th>Date</th>
-            <th>Time</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Point A</td>
-            <td id="point-a-date"></td>
-            <td id="point-a-time"></td>
-          </tr>
-          <tr>
-            <td>Point B</td>
-            <td id="point-b-date"></td>
-            <td id="point-b-time"></td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="history-stack">
+        <div class="history-card">
+          <h2>Last Scan</h2>
+          <p id="history-last-scan">No scans yet.</p>
+        </div>
+
+        <div class="history-card">
+          <h2>Latest by Location</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Location</th>
+                <th>Date</th>
+                <th>Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Point A</td>
+                <td id="point-a-date"></td>
+                <td id="point-a-time"></td>
+              </tr>
+              <tr>
+                <td>Point B</td>
+                <td id="point-b-date"></td>
+                <td id="point-b-time"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="history-card">
+          <h2>Full History</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Location</th>
+                <th>Date</th>
+                <th>Time</th>
+              </tr>
+            </thead>
+            <tbody id="history-log-body">
+              <tr>
+                <td colspan="3">No scans recorded yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </section>
   </div>
 
   <script>
+    const historyStorageKey = 'nfc-scan-history';
+    const scanHistory = loadHistory();
+
     function showTab(tabName) {
       const isScanner = tabName === 'scanner';
 
@@ -124,16 +171,60 @@
       return new Date().toLocaleDateString();
     }
 
+    function loadHistory() {
+      try {
+        const rawHistory = localStorage.getItem(historyStorageKey);
+        return rawHistory ? JSON.parse(rawHistory) : [];
+      } catch (error) {
+        console.error('Error loading scan history:', error);
+        return [];
+      }
+    }
+
+    function saveHistory() {
+      try {
+        localStorage.setItem(historyStorageKey, JSON.stringify(scanHistory));
+      } catch (error) {
+        console.error('Error saving scan history:', error);
+      }
+    }
+
+    function renderHistory() {
+      const historyLastScan = document.getElementById('history-last-scan');
+      const historyLogBody = document.getElementById('history-log-body');
+
+      if (scanHistory.length === 0) {
+        historyLastScan.textContent = 'No scans yet.';
+        historyLogBody.innerHTML = '<tr><td colspan="3">No scans recorded yet.</td></tr>';
+        return;
+      }
+
+      const latestScan = scanHistory[scanHistory.length - 1];
+      historyLastScan.textContent = latestScan.locationLabel + ' scanned on ' + latestScan.date + ' at ' + latestScan.time + '.';
+      historyLogBody.innerHTML = scanHistory
+        .slice()
+        .reverse()
+        .map((entry) => '<tr><td>' + entry.locationLabel + '</td><td>' + entry.date + '</td><td>' + entry.time + '</td></tr>')
+        .join('');
+    }
+
     function updatePoint(pointID) {
       const date = document.getElementById(pointID + '-date').textContent = getDate();
       const time = document.getElementById(pointID + '-time').textContent = getTime();
+      const locationLabel = pointID === 'point-a' ? 'Point A' : 'Point B';
 
-      const fs = require('fs');
-      try{
-        fs.writeFileSync('log.txt', `${pointID} scanned at ${date} ${time}\n`, { flag: 'a' });
-      }
-      catch (err) {
-        console.error('Error writing to log file:', err);
+      scanHistory.push({ pointID, locationLabel, date, time });
+      saveHistory();
+      renderHistory();
+
+      if (typeof require === 'function') {
+        const fs = require('fs');
+        try {
+          fs.writeFileSync('log.txt', `${pointID} scanned at ${date} ${time}\n`, { flag: 'a' });
+        }
+        catch (err) {
+          console.error('Error writing to log file:', err);
+        }
       }
     }
 
@@ -164,6 +255,8 @@
         document.getElementById('nfc-status').textContent = 'NFC error: ' + error;
       }
     }
+
+    renderHistory();
   </script>
 </body>
 </html>
