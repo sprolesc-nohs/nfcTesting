@@ -12,12 +12,16 @@
       color: #223018;
     }
     .app-shell {
-      max-width: 760px;
+      max-width: 960px;
+      width: 95%;
+      margin: 0 auto;
+      box-sizing: border-box;
     }
     .tabs {
       display: flex;
       gap: 10px;
       margin: 20px 0;
+      flex-wrap: wrap;
     }
     .tab-button {
       border: 1px solid #8fa873;
@@ -54,6 +58,15 @@
       display: grid;
       gap: 18px;
     }
+    .table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      min-width: 520px;
+    }
     .history-card {
       border: 1px solid #d7e2ca;
       background: #f4f7ef;
@@ -66,10 +79,6 @@
     .history-card p {
       margin: 0;
     }
-    table {
-      border-collapse: collapse;
-      width: 100%;
-    }
     th, td {
       border: 1px solid #9cb37e;
       padding: 10px 16px;
@@ -78,6 +87,16 @@
     th {
       background-color: #c7bb6f;
       background-color: #8fa873;
+    }
+
+    @media (max-width: 640px) {
+      body { padding: 12px; }
+      .tab-button { padding: 8px 10px; font-size: 0.95rem; }
+      .primary-button { padding: 8px 12px; }
+      .history-card { padding: 12px; }
+      .scan-summary { font-size: 0.95rem; }
+      table th, table td { padding: 8px 10px; }
+      .history-stack { gap: 12px; }
     }
   </style>
 </head>
@@ -107,7 +126,8 @@
 
         <div class="history-card">
           <h2>Latest by Location</h2>
-          <table>
+          <div class="table-wrap">
+            <table>
             <thead>
               <tr>
                 <th>Location</th>
@@ -127,12 +147,14 @@
                 <td id="point-b-time"></td>
               </tr>
             </tbody>
-          </table>
+            </table>
+          </div>
         </div>
 
         <div class="history-card">
           <h2>Full History</h2>
-          <table>
+          <div class="table-wrap">
+            <table>
             <thead>
               <tr>
                 <th>Location</th>
@@ -145,7 +167,8 @@
                 <td colspan="3">No scans recorded yet.</td>
               </tr>
             </tbody>
-          </table>
+            </table>
+          </div>
         </div>
       </div>
     </section>
