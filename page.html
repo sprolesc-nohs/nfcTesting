@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NFC Tag Tracker</title>
+  <style>
+    body {
+      font-family: monospace, sans-serif;
+      padding: 20px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 400px;
+    }
+    th, td {
+      border: 1px solid #9cb37e;
+      padding: 10px 16px;
+      text-align: left;
+    }
+    th {
+      background-color: #c7bb6f;
+    }
+  </style>
+</head>
+<body>
+  <h1>NFC Tag Tracker</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>Location</th>
+        <th>Date</th>
+        <th>Time</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Point A</td>
+        <td id="point-a-date"></td>
+        <td id="point-a-time"></td>
+      </tr>
+      <tr>
+        <td>Point B</td>
+        <td id="point-b-date"></td>
+        <td id="point-b-time"></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p id="nfc-status">Press the button, then scan a tag.</p>
+  <button onclick="startNFC()">Approach the Tag</button>
+
+  <script>
+    function getTime() {
+      return new Date().toLocaleTimeString();
+    }
+    function getDate() {
+      return new Date().toLocaleDateString();
+    }
+
+    function updatePoint(pointID) {
+      document.getElementById(pointID + '-date').textContent = getDate();
+      document.getElementById(pointID + '-time').textContent = getTime();
+    }
+
+    async function startNFC() {
+      try {
+        const reader = new NDEFReader();
+        await reader.scan();
+        document.getElementById('nfc-status').textContent = 'NFC ready — scan a tag';
+        reader.addEventListener('reading', ({ message }) => {
+          for (const record of message.records) {
+            let text = '';
+            if (record.recordType === 'text') {
+              text = new TextDecoder(record.encoding || 'utf-8').decode(record.data);
+            } else {
+              text = new TextDecoder().decode(record.data);
+            }
+            text = text.trim();
+            document.getElementById('nfc-status').textContent = 'Last scan: "' + text + '"';
+            if (text === 'point-a') updatePoint('point-a');
+            else if (text === 'point-b') updatePoint('point-b');
+          }
+        });
+        reader.addEventListener('readingerror', () => {
+          document.getElementById('nfc-status').textContent = 'Error reading tag — try again';
+        });
+      } catch (error) {
+        document.getElementById('nfc-status').textContent = 'NFC error: ' + error;
+      }
+    }
+  </script>
+</body>
+</html>
