@@ -1,10 +1,13 @@
 <!DOCTYPE html>
+<!-------------------------------------------------------------------------------------------------------------------------------------------------------->
+<!-- HTML (the blue <> bits)-->
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NFC Tag Tracker</title>
   <style>
+    /* CSS */
     body {
       font-family: monospace, sans-serif;
       padding: 20px;
@@ -51,12 +54,24 @@
   <button onclick="startNFC()">Approach the Tag</button>
 
   <script>
+    // JavaScript
+
+    /**
+     * Returns the current time as a string in the format "HH:MM:SS".
+     * @return String
+     */
     function getTime() {
       return new Date().toLocaleTimeString();
     }
+
+    /**
+     * Returns the current date as a string in the format "MM/DD/YYYY".
+     * @return String
+     */
     function getDate() {
       return new Date().toLocaleDateString();
     }
+
 
     function updatePoint(pointID) {
       document.getElementById(pointID + '-date').textContent = getDate();
@@ -65,27 +80,43 @@
 
     async function startNFC() {
       try {
+        // Check if the Web NFC API is supported
         const reader = new NDEFReader();
+        // Start scanning for NFC tags
         await reader.scan();
+        // Update the status to indicate that NFC is ready
         document.getElementById('nfc-status').textContent = 'NFC ready — scan a tag';
+        
+        // Listen for NFC tag readings
         reader.addEventListener('reading', ({ message }) => {
-          for (const record of message.records) {
-            let text = '';
-            if (record.recordType === 'text') {
-              text = new TextDecoder(record.encoding || 'utf-8').decode(record.data);
-            } else {
-              text = new TextDecoder().decode(record.data);
-            }
-            text = text.trim();
-            document.getElementById('nfc-status').textContent = 'Last scan: "' + text + '"';
-            if (text === 'point-a') updatePoint('point-a');
-            else if (text === 'point-b') updatePoint('point-b');
+            // Loop through all records in the NFC message
+            // records is an array of NDEFRecord objects, which represent the data read from the NFC tag
+            for (const record of message.records) {
+                // Initialize an empty string to hold the decoded text from the NFC tag    
+                let text = '';
+                // Check the type of the record and decode it accordingly
+                if (record.recordType === 'text') {
+                    // If the record is of type 'text', decode it using the specified encoding (defaulting to 'utf-8')
+                    text = new TextDecoder(record.encoding || 'utf-8').decode(record.data);
+                } else {
+                    // For other record types, decode using the default encoding
+                    text = new TextDecoder().decode(record.data);
+                }
+                // Trim any leading or trailing whitespace from the decoded text
+                text = text.trim();
+                // Update the status to show the last scanned text
+                document.getElementById('nfc-status').textContent = 'Last scan: "' + text + '"';
+                // Update the appropriate point based on the scanned text
+                updatePoint(text);
           }
         });
+        // Listen for errors during NFC reading
         reader.addEventListener('readingerror', () => {
+            // If there's an error reading the NFC tag, update the status to indicate the error
           document.getElementById('nfc-status').textContent = 'Error reading tag — try again';
         });
       } catch (error) {
+        // If there's an error initializing the NFC reader, update the status to show the error message
         document.getElementById('nfc-status').textContent = 'NFC error: ' + error;
       }
     }
