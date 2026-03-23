@@ -22,7 +22,7 @@
       text-align: left;
     }
     th {
-      background-color: #c7bb6f;
+      background-color: #88c76f;
     }
   </style>
 </head>
@@ -72,7 +72,10 @@
       return new Date().toLocaleDateString();
     }
 
-
+    /**
+     * Updates the date and time for a given point ID in the HTML table.
+     * @param {string} pointID - The ID of the point to update (e.g., "point-a" or "point-b").
+     */
     function updatePoint(pointID) {
       document.getElementById(pointID + '-date').textContent = getDate();
       document.getElementById(pointID + '-time').textContent = getTime();
